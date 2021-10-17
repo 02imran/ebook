@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ebook/authentication/firebase_login.dart';
 import 'package:ebook/screens/home_screen.dart';
 import 'package:ebook/utils/fire_auth.dart';
 import 'package:ebook/utils/validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -41,7 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
           padding: const EdgeInsets.all(24.0),
           child: Center(
             child: Wrap(
-             // mainAxisAlignment: MainAxisAlignment.center,
+              // mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Form(
                   key: _registerFormKey,
@@ -53,7 +52,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           alignment: Alignment.center,
                           width: 150,
                           height: 150,
-                          child: Center(child: Image.asset('assets/ebooklogo.jpg')),
+                          child: Center(
+                              child: Image.asset('assets/ebooklogo.jpg')),
                         ),
                       ),
                       Padding(
@@ -121,51 +121,53 @@ class _RegisterPageState extends State<RegisterPage> {
                       _isProcessing
                           ? CircularProgressIndicator()
                           : Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                setState(() {
-                                  _isProcessing = true;
-                                });
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      print('_isProcessing :' +
+                                          _isProcessing.toString());
+                                      setState(() {
+                                        _isProcessing = true;
+                                      });
 
-                                if (_registerFormKey.currentState!
-                                    .validate()) {
-                                  User user = (await FireAuth
-                                      .registerUsingEmailPassword(
-                                    name: _nameTextController.text,
-                                    email: _emailTextController.text,
-                                    password:
-                                    _passwordTextController.text,
-                                  ))!;
+                                      if (_registerFormKey.currentState!
+                                          .validate()) {
+                                        User user = (await FireAuth
+                                            .registerUsingEmailPassword(
+                                          name: _nameTextController.text,
+                                          email: _emailTextController.text,
+                                          password:
+                                              _passwordTextController.text,
+                                        ))!;
 
-                                  setState(() {
-                                    _isProcessing = false;
-                                  });
+                                        setState(() {
+                                          _isProcessing = false;
+                                        });
 
-                                  if (user != null) {
-                                    Navigator.of(context)
-                                        .pushAndRemoveUntil(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            HomeScreen(user),
-                                      ),
-                                      ModalRoute.withName('/'),
-                                    );
-                                  }
-                                }
-                              },
-                              child: Text(
-                                'Sign up',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                                        if (user != null) {
+                                          Navigator.of(context)
+                                              .pushAndRemoveUntil(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  HomeScreen(user),
+                                            ),
+                                            ModalRoute.withName('/'),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    child: Text(
+                                      'Sign up',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-
-                        ],
-                      ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 5),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 5),
                         child: Row(
                           children: [
                             Text(
@@ -176,12 +178,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                   fontWeight: FontWeight.w600),
                             ),
                             InkWell(
-                              onTap: (){
-                                Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          LoginPage(),
-                                    ));
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => LoginPage(),
+                                ));
                               },
                               child: Text(
                                 " Log In" + ' ',
