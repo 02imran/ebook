@@ -1,16 +1,14 @@
 class Validator {
-  static String validateName({ String? name}) {
+  static String? validateName({String? name}) {
     if (name == null) {
       return '';
     }
     if (name.isEmpty) {
       return 'Name can\'t be empty';
     }
-
-    return '';
   }
 
-  static String validateEmail({ String ?email}) {
+  static String? validateEmail({String? email}) {
     if (email == null) {
       return '';
     }
@@ -22,11 +20,9 @@ class Validator {
     } else if (!emailRegExp.hasMatch(email)) {
       return 'Enter a correct email';
     }
-
-    return'';
   }
 
-  static String validatePassword({ String ?password}) {
+  static String? validatePassword({String? password}) {
     if (password == null) {
       return '';
     }
@@ -35,7 +31,5 @@ class Validator {
     } else if (password.length < 6) {
       return 'Enter a password with length at least 6';
     }
-
-    return '';
   }
 }

@@ -1,15 +1,16 @@
-
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path/path.dart';
 
 class InformationPDFFormat extends StatefulWidget {
-  final File ?file;
-
+  final File? file;
+  final String? titleName;
   const InformationPDFFormat({
-    Key ?key,
+    Key? key,
     @required this.file,
+    @required this.titleName,
   }) : super(key: key);
 
   @override
@@ -27,27 +28,26 @@ class _InformationPDFFormatState extends State<InformationPDFFormat> {
     final text = '${indexPage + 1} of $pages';
 
     return Scaffold(
-      appBar:
-      AppBar(
-        title: Text('Policy'),
+      appBar: AppBar(
+        title: Text(widget.titleName ?? ''),
         actions: pages >= 2
             ? [
-          Center(child: Text(text)),
-          IconButton(
-            icon: Icon(Icons.chevron_left, size: 32),
-            onPressed: () {
-              final page = indexPage == 0 ? pages : indexPage - 1;
-              controller!.setPage(page);
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.chevron_right, size: 32),
-            onPressed: () {
-              final page = indexPage == pages - 1 ? 0 : indexPage + 1;
-              controller!.setPage(page);
-            },
-          ),
-        ]
+                Center(child: Text(text)),
+                IconButton(
+                  icon: Icon(Icons.chevron_left, size: 32),
+                  onPressed: () {
+                    final page = indexPage == 0 ? pages : indexPage - 1;
+                    controller!.setPage(page);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.chevron_right, size: 32),
+                  onPressed: () {
+                    final page = indexPage == pages - 1 ? 0 : indexPage + 1;
+                    controller!.setPage(page);
+                  },
+                ),
+              ]
             : null,
       ),
       body: PDFView(
