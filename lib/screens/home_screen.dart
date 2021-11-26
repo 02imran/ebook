@@ -1,7 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:aamarpay/aamarpay.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebook/authentication/firebase_login.dart';
 import 'package:ebook/models/book_list_model.dart';
 import 'package:ebook/screens/apps_informations/information_pdf_format.dart';
@@ -9,13 +6,6 @@ import 'package:ebook/screens/book_details_pdf.dart';
 import 'package:ebook/utils/file_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_sslcommerz/model/SSLCSdkType.dart';
-import 'package:flutter_sslcommerz/model/SSLCTransactionInfoModel.dart';
-import 'package:flutter_sslcommerz/model/SSLCommerzInitialization.dart';
-import 'package:flutter_sslcommerz/model/SSLCurrencyType.dart';
-import 'package:flutter_sslcommerz/sslcommerz.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import '../amar_pay_getway.dart';
 
@@ -33,6 +23,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _isSigningOut = false;
   bool isLoading = false;
+
+  String paymentStatus = '0';
+
+  final FirebaseFirestore firebaseStore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    firebaseStore.collection('eBooksUserProfile').snapshots().listen((event) {
+      event.docChanges.forEach((element) {
+        var mapData = element.doc.data();
+        setState(() {
+          paymentStatus = mapData!['PaymentStatus'];
+        });
+      });
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -300,27 +311,36 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: bookListCollection.length,
         itemBuilder: (BuildContext ctx, index) {
           BookListModel _bookInfo = bookListCollection[index];
-          return buildListViewUI(_bookInfo, ctx);
+          return buildListViewUI(_bookInfo, ctx, index);
         });
   }
 
-  Widget buildListViewUI(BookListModel eBook, BuildContext context) {
+  Widget buildListViewUI(BookListModel eBook, BuildContext context, int lng) {
     return InkWell(
       onTap: () async {
-        print(' Pay Now .....');
         final file = await FileFormat.loadAsset(eBook.bPdf!);
 
-        ///if(payment.status ==ture){
-        //goto the viewPDF file
-        //}else {goto  the ssl payment}
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BookDetailsPDF(file: file),
-          ),
-        );
-
-        // sslCommerzGeneralCall();
+        if (paymentStatus == '1') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BookDetailsPDF(file: file),
+            ),
+          );
+        } else if (paymentStatus == '0' && lng < 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BookDetailsPDF(file: file),
+            ),
+          );
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => MyPay(widget.user),
+            ),
+          );
+        }
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
@@ -346,114 +366,62 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                       color: Colors.teal,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14),
+                      fontSize: 16),
                   maxLines: 3,
                   overflow: TextOverflow.clip,
                 ),
               ),
-              Expanded(
-                flex: 2,
-                child: GestureDetector(
-                  onTap: () async {
-                    print(' Online payment : ');
+              lng >= 3
+                  ? Expanded(
+                      flex: 2,
+                      child: GestureDetector(
+                        onTap: () async {
+                          print(' Online payment : ');
 
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => MyPay(),
+                          if (paymentStatus == '1') {
+                            final file =
+                                await FileFormat.loadAsset(eBook.bPdf!);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    BookDetailsPDF(file: file),
+                              ),
+                            );
+                          } else {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MyPay(widget.user),
+                              ),
+                            );
+                          }
+                        },
+                        child: paymentStatus == '0'
+                            ? Icon(Icons.lock, size: 20)
+                            : Icon(Icons.lock_open_outlined, size: 20),
                       ),
-                    );
-                  },
-                  child: Icon(
-                    Icons.lock,
-                    size: 20,
-                  ),
-                ),
-              ),
+                    )
+                  : Expanded(
+                      flex: 2,
+                      child: GestureDetector(
+                        onTap: () async {
+                          print(' Free Documents : ');
+
+                          final file = await FileFormat.loadAsset(eBook.bPdf!);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookDetailsPDF(file: file),
+                            ),
+                          );
+                        },
+                        child: Icon(Icons.lock_open_outlined, size: 20),
+                      ),
+                    )
             ],
           ),
         ),
       ),
     );
-  }
-
-  /// ssl commerce payment method
-  Future<void> sslCommerzGeneralCall() async {
-    Sslcommerz sslcommerz = Sslcommerz(
-      initializer: SSLCommerzInitialization(
-          //Use the ipn if you have valid one, or it will fail the transaction.
-          // ipn_url: "www.ipnurl.com",
-          // multi_card_name: formData['multicard'],
-          currency: SSLCurrencyType.BDT,
-          sdkType: SSLCSdkType.TESTBOX,
-          store_id: 'taxol5c7cf3257d623',
-          //formData['store_id'],
-          store_passwd: 'taxol5c7cf3257d623@ssl',
-          //formData['store_password'],
-          total_amount: 100,
-          tran_id: "1231321321321312",
-          product_category: ''),
-    );
-    var result = await sslcommerz.payNow();
-
-    print(' Result SSL Commerce : ' + result.toString());
-    if (result is PlatformException) {
-      print("the response is: " +
-          result.message.toString() +
-          " code: " +
-          result.code);
-    } else {
-      SSLCTransactionInfoModel model = result;
-      print('***********************************');
-      print('Information :' + jsonEncode(model.toString()));
-      Fluttertoast.showToast(
-          msg: "Transaction successful: Amount ${model.amount} TK",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0);
-    }
-  }
-
-  amarPayPayment() {
-    return AamarpayData(
-        returnUrl: (url) {
-          print(url);
-        },
-        isLoading: (v) {
-          setState(() {
-            isLoading = v;
-          });
-        },
-        paymentStatus: (status) {
-          print(status);
-        },
-        cancelUrl: "example.com/payment/cancel",
-        successUrl: "example.com/payment/confirm",
-        failUrl: "example.com/payment/fail",
-        customerEmail: "masumbillahsanjid@gmail.com",
-        customerMobile: "01834760591",
-        customerName: "Masum Billah Sanjid",
-        signature: "dbb74894e82415a2f7ff0ec3a97e4183",
-        storeID: "aamarpaytest",
-        transactionAmount: "100",
-        transactionID: "daktarkhanabd",
-        description: "test",
-        url: "https://sandbox.aamarpay.com",
-        child: isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : Container(
-                color: Colors.orange,
-                height: 50,
-                child: Center(
-                    child: Text(
-                  "Payment",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white),
-                )),
-              ));
   }
 }

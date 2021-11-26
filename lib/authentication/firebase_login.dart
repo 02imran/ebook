@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebook/authentication/firebase_register.dart';
 import 'package:ebook/screens/home_screen.dart';
 import 'package:ebook/utils/fire_auth.dart';
@@ -35,7 +36,6 @@ class _LoginPageState extends State<LoginPage> {
 
     return firebaseApp;
   }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -154,6 +154,10 @@ class _LoginPageState extends State<LoginPage> {
 
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState?.save();
+
+
+
+
 
                       setState(() {
                         _isProcessing = true;

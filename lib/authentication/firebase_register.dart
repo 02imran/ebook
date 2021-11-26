@@ -1,4 +1,5 @@
 import 'package:ebook/authentication/firebase_login.dart';
+import 'package:ebook/firebase_crud_payment_status.dart';
 import 'package:ebook/screens/home_screen.dart';
 import 'package:ebook/utils/fire_auth.dart';
 import 'package:ebook/utils/validator.dart';
@@ -176,6 +177,18 @@ class _RegisterPageState extends State<RegisterPage> {
               if (_registerFormKey.currentState!.validate()) {
                 _registerFormKey.currentState?.save();
 
+                /// Firebase user  profile Database added
+                print('name :' + _nameTextController.text);
+                print('email :' + _emailTextController.text);
+                print('password :' + _nameTextController.text);
+                print('paymentStatus :' + '1');
+
+                Database.addUserRegister(
+                    userName: _nameTextController.text,
+                    userMail: _emailTextController.text,
+                    userPayStatus: '0');
+
+                /// Firebase Auth
                 User? user = (await FireAuth.registerUsingEmailPassword(
                   name: _nameTextController.text,
                   email: _emailTextController.text,

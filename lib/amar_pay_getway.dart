@@ -1,17 +1,29 @@
 import 'package:aamarpay/aamarpay.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MyPay extends StatefulWidget {
+  final User user;
+
+  MyPay(this.user);
+
   @override
   _MyPayState createState() => _MyPayState();
 }
 
 class _MyPayState extends State<MyPay> {
   bool isLoading = false;
-
+  String name = '';
+  String mail = '';
   @override
   Widget build(BuildContext context) {
+    print('userName :' + widget.user.displayName.toString());
+    name = widget.user.displayName.toString();
+    mail = widget.user.displayName.toString();
+    print('userMail :' + widget.user.email.toString());
+    print('userMail :' + widget.user.email.toString());
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: AamarpayData(
           returnUrl: (url) {
@@ -33,6 +45,7 @@ class _MyPayState extends State<MyPay> {
           customerName: "Masum Billah Sanjid",
           signature: "dbb74894e82415a2f7ff0ec3a97e4183",
           storeID: "aamarpaytest",
+          //storeID: "aamarpaytest",
           transactionAmount: "100",
           transactionID: "daktarkhanabd",
           description: "test",
@@ -41,18 +54,28 @@ class _MyPayState extends State<MyPay> {
               ? Center(
                   child: CircularProgressIndicator(),
                 )
-              : Container(
-                  color: Colors.lightBlue,
-                  height: 70,
-                  width: 200,
-                  child: Center(
-                      child: Text(
-                    "Payment Method",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 20),
-                  )),
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/payment.jpg'),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      margin: EdgeInsets.all(50),
+                      padding: EdgeInsets.all(10),
+                      height: 100,
+                      color: Colors.green,
+                      child: Center(
+                          child: Text(
+                        "Online Payment ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20),
+                      )),
+                    ),
+                  ],
                 ),
         ),
       ),
